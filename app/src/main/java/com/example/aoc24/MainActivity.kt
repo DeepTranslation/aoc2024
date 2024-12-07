@@ -19,6 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aoc24.ui.theme.AoC24Theme
+import org.jetbrains.kotlinx.multik.api.empty
+import org.jetbrains.kotlinx.multik.api.mk
+import org.jetbrains.kotlinx.multik.api.zeros
+import org.jetbrains.kotlinx.multik.ndarray.data.D2
+import org.jetbrains.kotlinx.multik.ndarray.data.get
+import org.jetbrains.kotlinx.multik.ndarray.data.set
 import java.io.InputStream
 import java.lang.Math.abs
 import kotlin.reflect.KFunction1
@@ -41,8 +47,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun puzzle(day: Int, modifier: Modifier = Modifier): String {
     // Switch between test input and real input here //
-    // val firstInput = true
-    val firstInput = false
+   // val firstInput = true
+      val firstInput = false
     val puzzleLetter = if (firstInput) "a" else "b"
     val content = getLines(filename = "day$day$puzzleLetter.txt") ?: return "not provided"
 
@@ -51,6 +57,7 @@ fun puzzle(day: Int, modifier: Modifier = Modifier): String {
         2 -> Pair (getSolutionDay2First(content), getSolutionDay2Second(content))
         3 -> Pair (getSolutionDay3First(content), getSolutionDay3Second(content))
         4 -> Pair (getSolutionDay4First(content), getSolutionDay4Second(content))
+        5 -> Pair (getSolutionDay5First(content), getSolutionDay5Second(content))
 
         else -> Pair(1,2)
     }
@@ -65,12 +72,37 @@ fun getSolutionDay25First(content: List<String>): Int {
     return -1
 }
 
-fun getSolutionDay4Second(content: List<String>): Int {
+fun getSolutionDay5Second(content: List<String>): Int {
     return -1
 }
 
-fun getSolutionDay4First(content: List<String>): Int {
+fun getSolutionDay5First(content: List<String>): Int {
     return -1
+}
+
+fun getSolutionDay4Second(content: List<String>): Int {
+    val twoDArray = get2DarrayOfChar(content)
+    val aoCFunctions = AoCFunctions()
+    val result = aoCFunctions.getXCenters(twoDArray)
+    return result
+}
+
+fun getSolutionDay4First(content: List<String>): Int {
+    val twoDArray = get2DarrayOfChar(content)
+    val aoCFunctions = AoCFunctions()
+    val result = aoCFunctions.countAllStrings(twoDArray, "XMAS")
+    return result
+}
+
+private fun get2DarrayOfChar(content: List<String>): Array<Array<Char>> {
+    val size = content[0].length
+    val twoDArray = Array(size) { Array<Char>(size) { '.' } }
+    for (j in content.indices) {
+        for (i in content.indices) {
+            twoDArray[j][i] = content[j].get(i)
+        }
+    }
+    return twoDArray
 }
 
 fun getSolutionDay3Second(content: List<String>): Int {
