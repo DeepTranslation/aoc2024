@@ -47,8 +47,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun puzzle(day: Int, modifier: Modifier = Modifier): String {
     // Switch between test input and real input here //
-   //val firstInput = true
-      val firstInput = false
+   val firstInput = true
+   //   val firstInput = false
     val puzzleLetter = if (firstInput) "a" else "b"
     val content = getLines(filename = "day$day$puzzleLetter.txt") ?: return "not provided"
 
@@ -58,6 +58,7 @@ fun puzzle(day: Int, modifier: Modifier = Modifier): String {
         3 -> Pair (getSolutionDay3First(content), getSolutionDay3Second(content))
         4 -> Pair (getSolutionDay4First(content), getSolutionDay4Second(content))
         5 -> Pair (getSolutionDay5First(content), getSolutionDay5Second(content))
+        6 -> Pair (getSolutionDay6First(content), getSolutionDay6Second(content))
 
         else -> Pair(1,2)
     }
@@ -72,28 +73,29 @@ fun getSolutionDay25First(content: List<String>): Int {
     return -1
 }
 
-fun getSolutionDay5Second(content: List<String>): Int {
+fun getSolutionDay6Second(content: List<String>): Int {
     return -1
 }
 
-fun getSolutionDay5First(content: List<String>): Int {
-    val rules: MutableList<Pair<Int, Int>> = mutableListOf()
-    val updates: MutableList<List<Int>> = mutableListOf()
-    for (line in content){
-        if (line.contains('|')){
-            val pages = line.split('|')
-            val rule = Pair(pages[0].toInt(), pages[1].toInt())
-            rules.add(rule)
-        }
-        if (line.contains(',')){
-            val updateStrings = line.split(',')
-            val update : MutableList<Int> = mutableListOf()
-            for (page in updateStrings){
-                update.add(page.toInt())
-            }
-            updates.add(update.toList())
+fun getSolutionDay6First(content: List<String>): Int {
+    return -1
+}
+
+fun getSolutionDay5Second(content: List<String>): Int {
+    val (rules: MutableList<Pair<Int, Int>>, updates: MutableList<List<Int>>) = getRulesAndUpdates(content)
+    var middlePageSum = 0
+    val aoCFunctions = AoCFunctions()
+    for (update in updates){
+        if (!aoCFunctions.isUpdateRightOrder(rules,update)) {
+            val correctedUpdate = aoCFunctions.correctOrder(rules, update)
+            middlePageSum += aoCFunctions.getMiddleNumber(correctedUpdate)
         }
     }
+    return middlePageSum
+}
+
+fun getSolutionDay5First(content: List<String>): Int {
+    val (rules: MutableList<Pair<Int, Int>>, updates: MutableList<List<Int>>) = getRulesAndUpdates(content)
     var middlePageSum = 0
     val aoCFunctions = AoCFunctions()
     for (update in updates){
@@ -101,6 +103,27 @@ fun getSolutionDay5First(content: List<String>): Int {
             middlePageSum += aoCFunctions.getMiddleNumber(update)
     }
     return middlePageSum
+}
+
+private fun getRulesAndUpdates(content: List<String>): Pair<MutableList<Pair<Int, Int>>, MutableList<List<Int>>> {
+    val rules: MutableList<Pair<Int, Int>> = mutableListOf()
+    val updates: MutableList<List<Int>> = mutableListOf()
+    for (line in content) {
+        if (line.contains('|')) {
+            val pages = line.split('|')
+            val rule = Pair(pages[0].toInt(), pages[1].toInt())
+            rules.add(rule)
+        }
+        if (line.contains(',')) {
+            val updateStrings = line.split(',')
+            val update: MutableList<Int> = mutableListOf()
+            for (page in updateStrings) {
+                update.add(page.toInt())
+            }
+            updates.add(update.toList())
+        }
+    }
+    return Pair(rules, updates)
 }
 
 fun getSolutionDay4Second(content: List<String>): Int {

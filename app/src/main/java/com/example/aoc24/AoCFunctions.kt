@@ -386,6 +386,22 @@ class AoCFunctions {
         val middleIndex = (size)/2
         return update[middleIndex]
     }
+
+    fun correctOrder(rules: List<Pair<Int, Int>>, changedUpdate: List<Int>): List<Int> {
+        val currentRules = getRulesForUpdate(rules, update = changedUpdate)
+        val ruleCount : MutableMap<Int, Int> = mutableMapOf()
+        for (number in changedUpdate){
+            ruleCount[number] = 0
+        }
+        for (rule in currentRules){
+            val newValue = ruleCount[rule.first]!!.plus(1)
+            ruleCount[rule.first] = newValue
+        }
+        val result = ruleCount.toList().sortedByDescending { (_, value) -> value}.toMap()
+        return result.keys.toList()
+    }
+
+    // day 6
 }
 
 enum class Direction {

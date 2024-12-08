@@ -68,4 +68,15 @@ class Day5Test {
         val result = aoCFunctions.getMiddleNumber(update)
         assertEquals(61, result)
     }
+
+    @Test
+    fun correctOrder(){
+        val aoCFunctions = AoCFunctions()
+        val changedUpdate = update.toMutableList()
+        val page3 = changedUpdate.get(2)
+        changedUpdate.removeAt(2)
+        changedUpdate.add(page3)
+        val result = aoCFunctions.correctOrder(rules, changedUpdate.toList())
+        assertEquals(update, result)
+    }
 }
