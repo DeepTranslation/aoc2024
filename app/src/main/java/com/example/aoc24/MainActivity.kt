@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun puzzle(day: Int, modifier: Modifier = Modifier): String {
     // Switch between test input and real input here //
-   // val firstInput = true
+   //val firstInput = true
       val firstInput = false
     val puzzleLetter = if (firstInput) "a" else "b"
     val content = getLines(filename = "day$day$puzzleLetter.txt") ?: return "not provided"
@@ -77,7 +77,30 @@ fun getSolutionDay5Second(content: List<String>): Int {
 }
 
 fun getSolutionDay5First(content: List<String>): Int {
-    return -1
+    val rules: MutableList<Pair<Int, Int>> = mutableListOf()
+    val updates: MutableList<List<Int>> = mutableListOf()
+    for (line in content){
+        if (line.contains('|')){
+            val pages = line.split('|')
+            val rule = Pair(pages[0].toInt(), pages[1].toInt())
+            rules.add(rule)
+        }
+        if (line.contains(',')){
+            val updateStrings = line.split(',')
+            val update : MutableList<Int> = mutableListOf()
+            for (page in updateStrings){
+                update.add(page.toInt())
+            }
+            updates.add(update.toList())
+        }
+    }
+    var middlePageSum = 0
+    val aoCFunctions = AoCFunctions()
+    for (update in updates){
+        if (aoCFunctions.isUpdateRightOrder(rules,update))
+            middlePageSum += aoCFunctions.getMiddleNumber(update)
+    }
+    return middlePageSum
 }
 
 fun getSolutionDay4Second(content: List<String>): Int {

@@ -117,6 +117,8 @@ class AoCFunctions {
         return sum
     }
 
+    // day 4
+
     fun getHorizontalStrings(matrix: Array<Array<Char>>): List<String> {
         val result: MutableList<String> = mutableListOf()
         for (array in matrix){
@@ -195,36 +197,7 @@ class AoCFunctions {
         return result
     }
 
-    fun getRightDiagonalStringsWithCoordinates(matrix: Array<Array<Char>>): Pair<List<String>,List<List<Pair<Int,Int>>>> {
-        val result: MutableList<String> = mutableListOf()
-        val coordinates: MutableList<List<Pair<Int, Int>>> = mutableListOf()
-        val size = matrix[0].size
-        // upper triangular
-        for (startingRow in 0 until  size) {
-            var i = 0
-            var string = ""
-            val coordinateList : MutableList<Pair<Int, Int>> = mutableListOf()
-            for (j in startingRow downTo  0){
-                string += matrix[j][i]
-                coordinateList.add(Pair(j,i))
-                i += 1
-            }
-            if (string.isNotEmpty()) result.add(string)
-            if (string.isNotEmpty()) coordinates.add(coordinateList.toList())
-        }
-        // lower triangular
-        for (startingcolumn in 1 until size) {
-            var j = size - 1
-            var string = ""
-            for (i in startingcolumn until size){
-                string += matrix[j][i]
-                j -= 1
-            }
-            if (string.isNotEmpty()) result.add(string)
-        }
 
-        return Pair(result.toList(),coordinates.toList())
-    }
 
     private fun countStrings(matrix: Array<Array<Char>>, searchString: String, getStringsFunction: (Array<Array<Char>>) -> List<String>  ): Int {
         val lines = getStringsFunction(matrix)
@@ -359,4 +332,62 @@ class AoCFunctions {
         }
         return false
     }
+
+    // day 5
+
+    fun getRulesForUpdate(rules: List<Pair<Int, Int>>, update: List<Int>): List<Pair<Int, Int>> {
+        val reducedRules : MutableList<Pair<Int, Int>> = mutableListOf()
+        for (rule in rules){
+            if (rule.first in update && rule.second in update){
+                reducedRules.add(rule)
+            }
+        }
+        return reducedRules
+    }
+
+    fun existsRuleWithLaterPage(rules: List<Pair<Int, Int>>, currentPage: Int, laterPage: Int): Boolean {
+        val ruleToCheck = Pair(currentPage, laterPage)
+        return rules.contains(ruleToCheck)
+    }
+
+    fun existsRuleWithEarlierPage(rules: List<Pair<Int, Int>>, currentPage: Int, earlierPage: Int): Boolean {
+        val ruleToCheck = Pair(earlierPage, currentPage)
+        return rules.contains(ruleToCheck)
+    }
+
+    fun isUpdateRightOrder(rules: List<Pair<Int, Int>>, update: List<Int>): Boolean {
+        for (pageIndex in update.indices){
+            for (pageToCompareIndex in update.indices ) {
+                if (pageToCompareIndex < pageIndex) {
+                    if (!existsRuleWithEarlierPage(
+                            rules,
+                            update[pageIndex],
+                            update[pageToCompareIndex]
+                        )
+                    )
+                        return false
+                }
+                if (pageToCompareIndex > pageIndex) {
+                   if (!existsRuleWithLaterPage(
+                        rules,
+                        update[pageIndex],
+                        update[pageToCompareIndex]
+                       )
+                   )
+                        return false
+                }
+            }
+        }
+        return true
+    }
+
+    fun getMiddleNumber(update: List<Int>): Int {
+        val size = update.size
+        val middleIndex = (size)/2
+        return update[middleIndex]
+    }
+}
+
+enum class Direction {
+    UP, RIGHT, DOWN, LEFT
 }
