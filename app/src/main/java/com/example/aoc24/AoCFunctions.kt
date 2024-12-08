@@ -402,8 +402,58 @@ class AoCFunctions {
     }
 
     // day 6
+
+    fun changeDirection(direction:  Direction): Direction {
+        if (direction == Direction.RIGHT) return Direction.DOWN
+        if (direction == Direction.DOWN) return Direction.LEFT
+        if (direction == Direction.LEFT) return Direction.UP
+        return Direction.RIGHT
+    }
+
+    fun getNextMove(nextPositionSymbol: Char): NextMove {
+        if (nextPositionSymbol in listOf( '.', 'X')) return NextMove.MOVE
+        return NextMove.TURN
+    }
+
+    fun getNextCoordinates(currentPosition: Pair<Int, Int>, direction: Direction): Pair<Int, Int>{
+        if (direction == Direction.RIGHT) return Pair(currentPosition.first, currentPosition.second + 1)
+        if (direction == Direction.DOWN) return Pair(currentPosition.first + 1, currentPosition.second)
+        if (direction == Direction.LEFT) return Pair(currentPosition.first, currentPosition.second - 1)
+        return Pair(currentPosition.first -1, currentPosition.second)
+    }
+
+    fun isPositionOffMap(nextPosition: Pair<Int, Int>, size: Int): Boolean {
+        return nextPosition.first < 0 ||
+                nextPosition.first >= size ||
+                nextPosition.second >= size||
+                nextPosition.second < 0
+    }
+
+    fun getStartingPosition(matrix: Array<Array<Char>>): Pair<Int, Int> {
+        for (j in matrix.indices){
+            for (i in matrix.indices){
+                if (matrix[j][i] == '^') return Pair(j,i)
+            }
+        }
+        return Pair(-1,-1)
+    }
+
+    fun countX(matrix: Array<Array<Char>>): Int {
+        var counter = 0
+        for (j in matrix.indices){
+            for (i in matrix.indices){
+                if (matrix[j][i] == 'X') counter += 1
+            }
+        }
+        return counter
+    }
+
 }
 
 enum class Direction {
     UP, RIGHT, DOWN, LEFT
+}
+
+enum class NextMove {
+    TURN, MOVE, END
 }

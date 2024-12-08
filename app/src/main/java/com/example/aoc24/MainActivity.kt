@@ -19,12 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aoc24.ui.theme.AoC24Theme
-import org.jetbrains.kotlinx.multik.api.empty
-import org.jetbrains.kotlinx.multik.api.mk
-import org.jetbrains.kotlinx.multik.api.zeros
-import org.jetbrains.kotlinx.multik.ndarray.data.D2
-import org.jetbrains.kotlinx.multik.ndarray.data.get
-import org.jetbrains.kotlinx.multik.ndarray.data.set
 import java.io.InputStream
 import java.lang.Math.abs
 import kotlin.reflect.KFunction1
@@ -78,7 +72,34 @@ fun getSolutionDay6Second(content: List<String>): Int {
 }
 
 fun getSolutionDay6First(content: List<String>): Int {
-    return -1
+    val map = get2DarrayOfChar(content)
+
+    val aoCFunctions = AoCFunctions()
+    val startingPosition = aoCFunctions.getStartingPosition(map)
+    map[startingPosition.first][ startingPosition.second] = 'X'
+    var currentPosition = startingPosition
+    var currentDirection = Direction.UP
+    var currentMove = NextMove.MOVE
+    var nextPosition : Pair<Int, Int>
+    var nextMove : NextMove
+    val size = map.size
+    do{
+        nextPosition = aoCFunctions.getNextCoordinates(currentPosition, currentDirection)
+        map[currentPosition.first][currentPosition.second] = 'X'
+        if (aoCFunctions.isPositionOffMap(nextPosition, size))
+            currentMove = NextMove.END
+        else  {
+            nextMove = aoCFunctions.getNextMove(map[nextPosition.first][nextPosition.second])
+            if (nextMove == NextMove.TURN){
+                currentDirection = aoCFunctions.changeDirection(currentDirection)
+            } else {
+                currentPosition = nextPosition
+            }
+        }
+        aoCFunctions.getNextMove(map[currentPosition.first][ currentPosition.second])
+    } while (currentMove != NextMove.END)
+
+    return aoCFunctions.countX(map)
 }
 
 fun getSolutionDay5Second(content: List<String>): Int {
