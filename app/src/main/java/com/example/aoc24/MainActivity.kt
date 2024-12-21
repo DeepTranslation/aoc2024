@@ -23,7 +23,6 @@ import java.io.InputStream
 import java.lang.Math.abs
 import kotlin.reflect.KFunction1
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,25 +37,31 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun puzzle(day: Int, modifier: Modifier = Modifier): String {
-    // Switch between test input and real input here //
-   val firstInput = true
-   //   val firstInput = false
-    val puzzleLetter = if (firstInput) "a" else "b"
-    val content = getLines(filename = "day$day$puzzleLetter.txt") ?: return "not provided"
 
-    val solutionPair = when (day) {
-        1 -> Pair (getSolutionDay1First(content), getSolutionDay1Second(content))
-        2 -> Pair (getSolutionDay2First(content), getSolutionDay2Second(content))
-        3 -> Pair (getSolutionDay3First(content), getSolutionDay3Second(content))
-        4 -> Pair (getSolutionDay4First(content), getSolutionDay4Second(content))
-        5 -> Pair (getSolutionDay5First(content), getSolutionDay5Second(content))
-        6 -> Pair (getSolutionDay6First(content), getSolutionDay6Second(content))
+fun puzzle(day: Int, testContent: List<String>, puzzleContent: List<String>): DayData {
+    // Switch between test input and real input here //
+   //val firstInput = true
+     val firstInput = false
+    val puzzleLetter = if (firstInput) "a" else "b"
+    val content : List<String>
+    if (firstInput) content = testContent
+    else content = puzzleContent
+    //val content = getLines(filename = "day$day$puzzleLetter.txt") ?: return "not provided"
+
+    val solutionPair : Pair<Long, Long> = when (day) {
+//        1 -> Pair (getSolutionDay1First(content).toLong(), getSolutionDay1Second(content).toLong())
+//        2 -> Pair (getSolutionDay2First(content).toLong(), getSolutionDay2Second(content).toLong())
+//        3 -> Pair (getSolutionDay3First(content).toLong(), getSolutionDay3Second(content).toLong())
+//        4 -> Pair (getSolutionDay4First(content).toLong(), getSolutionDay4Second(content).toLong())
+//        5 -> Pair (getSolutionDay5First(content).toLong(), getSolutionDay5Second(content).toLong())
+//        6 -> Pair (getSolutionDay6First(content).toLong(), getSolutionDay6Second(content).toLong())
+     //   7 -> Pair (getSolutionDay7First(content), getSolutionDay7Second(content))
+        7 -> Pair (-1, getSolutionDay7Second(content))
 
         else -> Pair(1,2)
     }
-    return solutionPair.toString()
+    var dayData = DayData(firstInput, solutionPair)
+    return dayData
 }
 
 fun getSolutionDay25Second(content: List<String>): Int {
@@ -67,8 +72,80 @@ fun getSolutionDay25First(content: List<String>): Int {
     return -1
 }
 
+fun getSolutionDay7Second(content: List<String>): Long {
+    var sum : Long = 0
+    for (line in content){
+        val parts = line.split(": ")
+        val result = parts[0].toLong()
+        val numbers = parts[1].split(' ').map { it.toInt()  }
+        val aoCFunctions = AoCFunctions()
+        if (aoCFunctions.getTernaryOperationResult(result, numbers)) sum += result
+    }
+    return sum
+}
+
+fun getSolutionDay7First(content: List<String>): Long {
+var sum : Long = 0
+    for (line in content){
+        val parts = line.split(": ")
+        val result = parts[0].toLong()
+        val numbers = parts[1].split(' ').map { it.toInt()  }
+        val aoCFunctions = AoCFunctions()
+        if (aoCFunctions.getOperationResult(result, numbers)) sum += result
+    }
+    return sum
+}
+
 fun getSolutionDay6Second(content: List<String>): Int {
-    return -1
+    val map = get2DarrayOfChar(content)
+
+    val aoCFunctions = AoCFunctions()
+    val startingPosition = aoCFunctions.getStartingPosition(map)
+    map[startingPosition.first][ startingPosition.second] = 'X'
+    var currentPosition = startingPosition
+    var currentDirection = Direction.UP
+    var currentMove = NextMove.MOVE
+    var nextPosition : Pair<Int, Int>
+    var nextMove : NextMove
+    val size = map.size
+    val previousDirectionsMap = Array(size) { Array<MutableSet<Direction>>(size) { mutableSetOf() } }
+    previousDirectionsMap[startingPosition.first][startingPosition.second].add(currentDirection)
+   aoCFunctions.addDirectionToMap(previousDirectionsMap, startingPosition, Direction.UP)
+    var obstacleCounter = 0
+    var possibleNextDirection : Direction
+    var possibleSecondNextDirection : Direction
+    do{
+        nextPosition = aoCFunctions.getNextCoordinates(currentPosition, currentDirection)
+        map[currentPosition.first][currentPosition.second] = 'X'
+        if (aoCFunctions.isPositionOffMap(nextPosition, size))
+            currentMove = NextMove.END
+        else  {
+            // obstacle possible?
+            possibleNextDirection = aoCFunctions.changeDirection(currentDirection)
+            if (previousDirectionsMap[currentPosition.first][currentPosition.second].contains(possibleNextDirection)){
+                obstacleCounter += 1
+            }
+            //distant obstacle possible?
+            possibleSecondNextDirection = aoCFunctions.changeDirection(possibleNextDirection)
+            aoCFunctions.unusedObstacle(previousDirectionsMap, currentPosition, possibleNextDirection)
+
+
+            // calculate next move
+            nextMove = aoCFunctions.getNextMove(map[nextPosition.first][nextPosition.second])
+            if (nextMove == NextMove.TURN){
+                currentDirection = aoCFunctions.changeDirection(currentDirection)
+            }
+           aoCFunctions.addDirectionToMap(previousDirectionsMap, currentPosition, currentDirection)
+
+            if (nextMove == NextMove.MOVE) {
+                currentPosition = nextPosition
+            }
+        }
+        aoCFunctions.getNextMove(map[currentPosition.first][ currentPosition.second])
+    } while (currentMove != NextMove.END)
+
+    return obstacleCounter
+
 }
 
 fun getSolutionDay6First(content: List<String>): Int {
@@ -96,7 +173,7 @@ fun getSolutionDay6First(content: List<String>): Int {
                 currentPosition = nextPosition
             }
         }
-        aoCFunctions.getNextMove(map[currentPosition.first][ currentPosition.second])
+        //aoCFunctions.getNextMove(map[currentPosition.first][ currentPosition.second])
     } while (currentMove != NextMove.END)
 
     return aoCFunctions.countX(map)
@@ -311,17 +388,25 @@ private fun getSolutionDay1Second(
 private fun Greetings(
     modifier: Modifier = Modifier,
     days: List<Int> = List(10) {it+1}){
-            LazyColumn(modifier = modifier) {
+    val context = LocalContext.current
+    val solutions = getLines(filename = "solutions.txt")
+    val solutionsList : MutableList<DayData> = mutableListOf()
+    LazyColumn(modifier = modifier) {
                 items( items = days) { day ->
-                    val solutionPair = puzzle(day = day, modifier = Modifier.padding(vertical = 4.dp))
-
+                    val testContent = getLines(filename = "day"+ day + "a.txt") ?: return@items
+                    val puzzleContent = getLines(filename = "day"+ day + "b.txt") ?: return@items
+                    val dayData = puzzle(day = day, testContent = testContent, puzzleContent = puzzleContent)
+                    val resultString : String
+                    resultString = if (dayData.part1) "part1: " + dayData.solutionPair
+                    else "part2: " + dayData.solutionPair
+                    solutionsList.add(dayData)
                     Surface(
                         color = MaterialTheme.colorScheme.tertiaryContainer,
                         shape = MaterialTheme.shapes.medium,
                         modifier = modifier.padding(vertical = 10.dp)){
 
                         Text(
-                            text = "Solution for day  $day: ${solutionPair}",
+                            text = "Solution for day  $day: $resultString",
                             modifier = Modifier.padding(all = 10.dp),
                             fontSize = 10.sp
                         )
@@ -329,6 +414,22 @@ private fun Greetings(
 
                 }
             }
+   // val json = Json.encodeToString(solutionsList)
+
+//        val file = File("solutions.txt")
+//        file.writeText("huhu")
+//    val myOutput = FileOutputStream("solutions.txt")
+//    myOutput.write("huhu".toByteArray())
+//    try {
+//        val fos: FileOutputStream =
+//            context.openFileOutput("demoFile.txt", Context.MODE_PRIVATE)
+//        fos.write("huhu".toByteArray())
+//        fos.flush()
+//        fos.close()
+//    } catch (e: IOException) {
+//        e.printStackTrace()
+//    }
+
 }
 
 @Composable
@@ -359,13 +460,13 @@ private fun getLines (filename: String): List<String>? {
     return content
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AoC24Theme {
-        puzzle(1)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    AoC24Theme {
+//        puzzle(1)
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
@@ -382,3 +483,16 @@ fun SolutionPreview() {
         Solution()
     }
 }
+
+
+
+//@Serializable
+data class DayData(
+    val part1: Boolean,
+    var solutionPair: Pair<Long, Long>
+)
+
+//@Serializable
+//data class DayDataMap(
+//    val dataMap: Map<Int, DayData>
+//)

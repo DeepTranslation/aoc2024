@@ -1,5 +1,7 @@
 package com.example.aoc24
 
+import kotlin.math.pow
+
 class AoCFunctions {
     val multiplicationRegexString = """mul\(\d{1,3}+,\d{1,3}+\)"""
 
@@ -448,7 +450,156 @@ class AoCFunctions {
         return counter
     }
 
+    fun addDirectionToMap(
+        directionsMap: Array<Array<MutableSet<Direction>>>,
+        currentPosition: Pair<Int, Int>,
+        currentDirection: Direction
+    ) {
+        val size = directionsMap.size
+        if (currentDirection == Direction.UP){
+            for (i in currentPosition.first until size){
+                directionsMap[i][currentPosition.second].add(currentDirection)
+            }
+        }
+        if (currentDirection == Direction.DOWN){
+            for (i in currentPosition.first downTo 0){
+                directionsMap[i][currentPosition.second].add(currentDirection)
+            }
+        }
+        if (currentDirection == Direction.LEFT){
+            for (i in currentPosition.second until size){
+                directionsMap[currentPosition.first][i].add(currentDirection)
+            }
+        }
+        if (currentDirection == Direction.RIGHT){
+            for (i in currentPosition.second downTo 0){
+                directionsMap[currentPosition.first][i].add(currentDirection)
+            }
+        }
+    }
+
+//    fun getOperationResult(result: Int, numbers: List<Int>): Int {
+//        // iterate over all combinations of operations
+//        var operationResult = 0
+//        for (i in 1 until numbers.size){
+//            var tempResult = numbers[0]
+//            for (operation in 0 until 2){
+//                for (j in 1 until numbers.size){
+//                    when (operation){
+//                        0 -> tempResult += numbers[i]
+//                        else -> tempResult *= numbers[i]
+//                    }
+//                }
+//            }
+//        }
+//        return operationResult
+//    }
+
+
+    fun getOperationResult(result: Long, numbers: List<Int>): Boolean {
+        // iterate over all combinations of operations
+        val operatorCount = numbers.size - 1
+        val combinationCount = 2.0.pow(operatorCount).toInt()
+        val binaryStringLength = Integer.toBinaryString(combinationCount-1).length
+        for (i in 0 until combinationCount ){
+            val binaryCombination = Integer.toBinaryString(i).padStart(binaryStringLength, '0')
+            var currentResult : Long = numbers[0].toLong()
+            for (j in binaryCombination.indices){
+                if (binaryCombination[j] == '0'){
+                    currentResult += numbers[j+1].toLong()
+                }else{
+                    currentResult *= numbers[j+1].toLong()
+                }
+            }
+            if (currentResult == result) return true
+
+        }
+
+        return false
+    }
+
+    fun getTernaryOperationResult(result: Long, numbers: List<Int>): Boolean {
+        val operatorCount = numbers.size - 1
+        val combinationCount = 3.0.pow(operatorCount).toLong()
+        val ternaryStringLength = convertDecimalToTernary(combinationCount-1).length
+        for (i in 0 until combinationCount ){
+            val ternaryCombination = convertDecimalToTernary(i).padStart(ternaryStringLength, '0')
+            var currentResult : Long = numbers[0].toLong()
+            for (j in ternaryCombination.indices){
+                if (ternaryCombination[j] == '0'){
+                    currentResult += numbers[j+1].toLong()
+                }else if (ternaryCombination[j] == '1'){
+                    currentResult *= numbers[j+1].toLong()
+                }else {
+                    val secondNumber = numbers[j+1].toLong()
+                    val secondNumberLength = secondNumber.toString().length
+                   // currentResult = (currentResult.toString() + numbers[j+1].toLong().toString()).toLong()
+                    currentResult = currentResult * 10.0.pow(secondNumberLength).toLong() + secondNumber
+                }
+            }
+            if (currentResult == result) return true
+
+        }
+
+        return false
+    }
+
+    fun convertDecimalToTernary(n: Long): String {
+        var n = n
+        var ternaryNumber: Long = 0
+        var remainder: Long
+        var i = 1
+
+        while (n != 0L) {
+            remainder = n % 3
+            n /= 3
+            ternaryNumber += (remainder * i).toLong()
+            i *= 10
+        }
+        return ternaryNumber.toString()
+    }
+
+    fun unusedObstacle(previousDirectionsMap: Array<Array<MutableSet<Direction>>>, currentPosition: Pair<Int, Int>, possibleNextDirection: Direction) {
+        val possibleSecondNextDirection = changeDirection(possibleNextDirection)
+
+    }
+
+//    fun addDirectionToMap(
+//        directionsMap: Array<Array<MutableSet<Direction>>>,
+//        currentPosition: Pair<Int, Int>,
+//        currentDirection: Direction
+//    ) {
+//        val size = directionsMap.size
+//        if (currentDirection == Direction.UP){
+//            for (i in currentPosition.first until size){
+//                directionsMap[i][currentPosition.second].add(currentDirection)
+//            }
+//        }
+//        if (currentDirection == Direction.DOWN){
+//            for (i in currentPosition.first downTo 0){
+//                directionsMap[i][currentPosition.second].add(currentDirection)
+//            }
+//        }
+//        if (currentDirection == Direction.LEFT){
+//            for (i in currentPosition.second until size){
+//                directionsMap[currentPosition.first][i].add(currentDirection)
+//            }
+//        }
+//        if (currentDirection == Direction.RIGHT){
+//            for (i in currentPosition.second downTo 0){
+//                directionsMap[currentPosition.first][i].add(currentDirection)
+//            }
+//        }
+//    }
 }
+    fun bla(result: Int, numbers: List<Int>, position: Int):Int{
+        if (position == 0){
+            return numbers[0]
+
+        } else {
+            return 2
+        }
+    }
 
 enum class Direction {
     UP, RIGHT, DOWN, LEFT
@@ -457,3 +608,4 @@ enum class Direction {
 enum class NextMove {
     TURN, MOVE, END
 }
+

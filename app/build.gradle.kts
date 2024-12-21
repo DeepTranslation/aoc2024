@@ -2,7 +2,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
+
+
 
 android {
     namespace = "com.example.aoc24"
@@ -76,5 +79,8 @@ dependencies {
     implementation(kotlin("test"))
     implementation(libs.multik.core)
     implementation(libs.multik.default)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlin.serialization.compiler.plugin)
 
 }
