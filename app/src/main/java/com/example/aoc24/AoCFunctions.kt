@@ -1,5 +1,6 @@
 package com.example.aoc24
 
+import java.util.SortedMap
 import kotlin.math.pow
 
 class AoCFunctions {
@@ -561,6 +562,158 @@ class AoCFunctions {
 
     fun unusedObstacle(previousDirectionsMap: Array<Array<MutableSet<Direction>>>, currentPosition: Pair<Int, Int>, possibleNextDirection: Direction) {
         val possibleSecondNextDirection = changeDirection(possibleNextDirection)
+
+    }
+
+    // day 9
+
+    fun getBlocks(s: String): List<Int> {
+        var isFile = true
+        val disk : MutableList<Int> = mutableListOf()
+        var idCounter = 0
+        for (char in s){
+            if (isFile){
+                for (i in 0 until char.toString().toInt()) {
+                    disk.add(idCounter)
+                }
+                idCounter ++
+                isFile = false
+            } else {
+                for (i in 0 until char.toString().toInt()){
+                    disk.add(-1)
+                }
+                isFile = true
+            }
+        }
+        return disk.toList()
+    }
+
+    fun moveBlocks(disk: List<Int>): List<Int>  {
+        val emptyBlockCount = disk.count{it == -1}
+        val reorderedDisk = disk.toMutableList()
+        var reverseCounter = disk.size -1
+        for (index in disk.indices){
+            if (disk[index] == -1){
+                while (disk[reverseCounter] == -1 ){
+                    reverseCounter--
+                }
+                if (reverseCounter < disk.size - emptyBlockCount) break
+                reorderedDisk[index] = disk[reverseCounter]
+                reorderedDisk[reverseCounter] = -1
+                reverseCounter--
+            }
+            if (reverseCounter < disk.size - emptyBlockCount) break
+        }
+        return reorderedDisk
+    }
+
+    fun calculateChecksum(disk: List<Int>): Long {
+        var checksum : Long = 0
+        for (index in disk.indices){
+            if (disk[index] > -1){
+                checksum += index * disk[index]
+            }
+        }
+        return checksum
+    }
+
+    fun getFreeBlocks(blocks: List<Int>): Map<Int, Int>{
+        val freeBlocks : MutableMap<Int, Int> = mutableMapOf()
+        var previousBlockIsFree = false
+        var freeCount = 0
+        var freeStartingBlock = 0
+        for (index in blocks.indices){
+            if (blocks[index] > -1){
+                if (previousBlockIsFree) {
+                    freeBlocks.set(freeStartingBlock, freeCount)
+                    freeCount = 0
+                    freeStartingBlock = 0
+                    previousBlockIsFree = false
+                } else {
+
+                }
+            } else {
+                if (!previousBlockIsFree) freeStartingBlock = index
+                freeCount ++
+                previousBlockIsFree = true
+            }
+
+        }
+        if (freeStartingBlock > 0 && freeCount > 0)  freeBlocks.set(freeStartingBlock, freeCount)
+        return freeBlocks.toMap()
+    }
+
+    fun getFileBlocks(blocks: List<Int>): Map<Int, Pair<Int, Int>> {
+        val fileBlocks : MutableMap<Int, Pair<Int, Int>> = mutableMapOf()
+        var previousBlockIsFile = false
+        var fileCount = 0
+        var fileStartingBlock = 0
+        var fileId = -1
+        for (index in blocks.indices){
+            if (blocks[index] == -1){
+                if (previousBlockIsFile) {
+
+                    fileBlocks[fileId] = Pair(fileStartingBlock, fileCount)
+                    fileCount = 0
+                    fileStartingBlock = 0
+                    previousBlockIsFile = false
+                }
+            } else {
+                if (!previousBlockIsFile) {fileStartingBlock = index
+                    fileId++
+                } else {
+                    if (blocks[index]!= fileId){
+                        fileBlocks[fileId] = Pair(fileStartingBlock, fileCount)
+                        fileCount = 0
+                        fileStartingBlock = index
+                        fileId++
+                    }
+                }
+                fileCount ++
+                previousBlockIsFile = true
+            }
+
+        }
+        if (fileStartingBlock > 0 && fileCount > 0) fileBlocks[fileId] =
+            Pair(fileStartingBlock, fileCount)
+        return fileBlocks.toMap()
+    }
+
+    fun getMovingLocation(disk: List<Int>, requiredSpace: Int): Int {
+        val freeBlocks = getFreeBlocks(disk).toSortedMap()
+        for (key in freeBlocks.keys){
+            if (freeBlocks[key]!! >= requiredSpace){
+                return key
+            }
+        }
+        return -1
+    }
+
+    fun moveWholeFiles(disk: List<Int>): List<Int> {
+        val reorderedDisk = disk.toMutableList()
+        var fileBlocks = getFileBlocks(disk)
+        //var currentFileId = disk.toSortedSet().last()
+        var currentFileId = disk.last()
+        while (currentFileId > 0){
+
+            val currentFileOriginalData = getFileBlocks(disk)[currentFileId]
+            val currentFilePosition = currentFileOriginalData?.first
+            val currentFileLength = currentFileOriginalData?.second
+            val movingLocation = currentFileLength?.let { getMovingLocation(reorderedDisk, it) }
+            if (movingLocation != null && currentFilePosition != null ) {
+                if (movingLocation > -1 && movingLocation < currentFilePosition) {
+                    for (fileIndex in 0 until currentFileLength){
+                        reorderedDisk[movingLocation + fileIndex] = currentFileId
+                        reorderedDisk[currentFilePosition + fileIndex] = -1
+                    }
+                }
+            }
+            currentFileId--
+
+
+        }
+
+        return reorderedDisk
 
     }
 

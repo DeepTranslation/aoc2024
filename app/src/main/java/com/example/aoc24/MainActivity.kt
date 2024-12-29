@@ -54,9 +54,11 @@ fun puzzle(day: Int, testContent: List<String>, puzzleContent: List<String>): Da
 //        3 -> Pair (getSolutionDay3First(content).toLong(), getSolutionDay3Second(content).toLong())
 //        4 -> Pair (getSolutionDay4First(content).toLong(), getSolutionDay4Second(content).toLong())
 //        5 -> Pair (getSolutionDay5First(content).toLong(), getSolutionDay5Second(content).toLong())
-//        6 -> Pair (getSolutionDay6First(content).toLong(), getSolutionDay6Second(content).toLong())
+     //   6 -> Pair (getSolutionDay6First(content).toLong(), getSolutionDay6Second(content).toLong())
      //   7 -> Pair (getSolutionDay7First(content), getSolutionDay7Second(content))
-        7 -> Pair (-1, getSolutionDay7Second(content))
+      //    7 -> Pair (-1, getSolutionDay7Second(content))
+          // 9 -> Pair (getSolutionDay9First(content), getSolutionDay9Second(content).toLong())
+           9 -> Pair (-1, getSolutionDay9Second(content).toLong())
 
         else -> Pair(1,2)
     }
@@ -70,6 +72,25 @@ fun getSolutionDay25Second(content: List<String>): Int {
 
 fun getSolutionDay25First(content: List<String>): Int {
     return -1
+}
+
+fun getSolutionDay9Second(content: List<String>): Long {
+    val line = content[0]
+    val aoCFunctions = AoCFunctions()
+    val disk = aoCFunctions.getBlocks(line)
+    val reorderedDisk = aoCFunctions.moveWholeFiles(disk)
+
+    return aoCFunctions.calculateChecksum(reorderedDisk)
+}
+
+fun getSolutionDay9First(content: List<String>): Long {
+
+    val line = content[0]
+    val aoCFunctions = AoCFunctions()
+    val disk = aoCFunctions.getBlocks(line)
+    val reorderedDisk = aoCFunctions.moveBlocks(disk)
+
+    return aoCFunctions.calculateChecksum(reorderedDisk)
 }
 
 fun getSolutionDay7Second(content: List<String>): Long {
